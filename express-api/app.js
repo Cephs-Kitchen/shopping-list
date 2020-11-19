@@ -107,6 +107,20 @@ app.get("/shoppinglist/:listId/items", (req, res) => {
     );
 });
 
+// GET shoppinglist with items but sorted
+app.get("/shoppinglist/:listId/items/sorted", (req, res) => {
+    db.query(
+        "SELECT link_id, item_name, category_name, item_count FROM tbl_shoppinglist_items INNER JOIN tbl_items ON tbl_items.item_id = tbl_shoppinglist_items.item_id INNER JOIN tbl_item_categories ON tbl_item_categories.category_id = tbl_items.category_id WHERE list_id = $1 ORDER BY category_name",
+        [req.params.listId],
+        (db_err, db_res) => {
+            if (db_err) {
+                throw db_err;
+            }
+            res.status(200).json(db_res.rows);
+        }
+    );
+});
+
 // POST item to shoppinglist
 app.post("/shoppinglist/:listId/item", (req, res) => {
     let result;
@@ -162,6 +176,66 @@ app.delete("/shoppinglist/:listId/item", (req, res) => {
     res.json(result);
 });
 
+// Empty entire shoppinglist
+app.delete("/shoppinglist/:listId/empty", (req, res) => {
+    let result;
+    db.query(
+        "DELETE FROM tbl_shoppinglist_items WHERE list_id = $1",
+        [req.params.listId],
+        (db_err, db_res) => {
+            if (db_err) {
+                throw db_err;
+            }
+        }
+    );
+    result = {
+        status: "success",
+        message: "All items have been deleted.",
+    };
+    res.json(result);
+});
+
+// POST Increment Item
+app.post("/shoppinglist/:listId/update", (req, res) => {
+    let result;
+    const itemDetails = req.body;
+    if (itemDetails.linkID && itemDetails.change == 1) {
+        db.query(
+            "UPDATE tbl_shoppinglist_items SET item_count = item_count + 1 WHERE link_id = $1",
+            [itemDetails.linkID],
+            (db_err, db_res) => {
+                if (db_err) {
+                    throw db_err;
+                }
+            }
+        );
+        result = {
+            status: "success",
+            message: "The amount increased.",
+        };
+    } else if (itemDetails.linkID && itemDetails.change == -1) {
+        db.query(
+            "UPDATE tbl_shoppinglist_items SET item_count = item_count - 1 WHERE link_id = $1",
+            [itemDetails.linkID],
+            (db_err, db_res) => {
+                if (db_err) {
+                    throw db_err;
+                }
+            }
+        );
+        result = {
+            status: "success",
+            message: "The amount decreased.",
+        };
+    } else {
+        result = {
+            status: "failed",
+            message: "No changes were made to shopping list.",
+        };
+    }
+    res.json(result);
+});
+
 // POST item to pantry
 app.post("/pantrylist/fromList", (req, res) => {
     let qryResult;
@@ -185,7 +259,8 @@ app.post("/pantrylist/fromList", (req, res) => {
                         db.query(
                             "UPDATE tbl_pantrylist SET amount = $1 WHERE pantry_item_id = $2",
                             [
-                                qryResult[0].amount + parseInt(itemDetails.itemCount),
+                                qryResult[0].amount +
+                                    parseInt(itemDetails.itemCount),
                                 qryResult[0].pantry_item_id,
                             ],
                             (db_err, db_res) => {
@@ -229,5 +304,5 @@ app.post("/pantrylist/fromList", (req, res) => {
 });
 
 app.listen(port, () =>
-    console.log(`Example app listening at http://localhost:${port}`)
+    console.log(`Shoppinglist API listening at http://localhost:${port}`)
 );
