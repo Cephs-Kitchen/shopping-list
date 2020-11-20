@@ -21,9 +21,9 @@ app.get("", (req, res) => {
     res.send("Connected");
 });
 
-// GET items  ---- /shoppinglist/items
+// GET items  ---- /items
 app.get("/items", (req, res) => {
-    db.query("SELECT * FROM tbl_items", (db_err, db_res) => {
+    db.query("SELECT *, category_name FROM tbl_items INNER JOIN tbl_item_categories ON tbl_items.category_id = tbl_item_categories.category_id ORDER BY category_name, item_name", (db_err, db_res) => {
         if (db_err) {
             throw db_err;
         }
@@ -31,7 +31,7 @@ app.get("/items", (req, res) => {
     });
 });
 
-// GET item by id  ---- /shoppinglist/items?id=#
+// GET item by id or search  ---- /item
 app.get("/item", (req, res) => {
     if (req.query.id) {
         db.query(
@@ -235,6 +235,10 @@ app.post("/shoppinglist/:listId/update", (req, res) => {
     }
     res.json(result);
 });
+
+app.get("/items/:list", (req, res) => {
+
+})
 
 // POST item to pantry
 app.post("/pantrylist/fromList", (req, res) => {
