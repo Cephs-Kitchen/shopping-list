@@ -1,3 +1,6 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+
 function ItemList(props) {
     const items = props.items;
     let category;
@@ -14,7 +17,9 @@ function ItemList(props) {
                 {categoryLabel}
                 <p>
                     {item.item_name}{" "}
-                    <button onClick={props.handleOnClick}>+</button>
+                    <span className="button-span" onClick={() => props.handleOnClick(item.item_id)}>
+                        <FontAwesomeIcon icon={faPlus} />
+                    </span>
                 </p>
             </div>
         );

@@ -23,12 +23,15 @@ app.get("", (req, res) => {
 
 // GET items  ---- /items
 app.get("/items", (req, res) => {
-    db.query("SELECT *, category_name FROM tbl_items INNER JOIN tbl_item_categories ON tbl_items.category_id = tbl_item_categories.category_id ORDER BY category_name, item_name", (db_err, db_res) => {
-        if (db_err) {
-            throw db_err;
+    db.query(
+        "SELECT *, category_name FROM tbl_items INNER JOIN tbl_item_categories ON tbl_items.category_id = tbl_item_categories.category_id ORDER BY category_name, item_name",
+        (db_err, db_res) => {
+            if (db_err) {
+                throw db_err;
+            }
+            res.status(200).json(db_res.rows);
         }
-        res.status(200).json(db_res.rows);
-    });
+    );
 });
 
 // GET item by id or search  ---- /item
@@ -46,36 +49,87 @@ app.get("/item", (req, res) => {
         );
     } else if (req.query.search) {
         let strSearch = "%" + decodeURIComponent(req.query.search) + "%";
-        db.query("SELECT * FROM tbl_items WHERE item_name LIKE ");
+        db.query(
+            "SELECT * FROM tbl_items WHERE item_name LIKE $1",
+            [strSearch],
+            (db_err, db_res) => {
+                if (db_err) {
+                    throw db_err;
+                }
+                res.status(200).json(db_res.rows);
+            }
+        );
     }
 });
 
 // POST item to items
 app.post("/item", (req, res) => {
     let result;
+    let qryResult;
     const itemDetails = req.body;
     if (itemDetails.name && itemDetails.categoryID) {
+        // Check and see if the item already exists
         db.query(
-            "INSERT INTO tbl_items (item_name, category_id) VALUES ($1, $2)",
+            "SELECT item_id FROM tbl_items WHERE item_name = $1 and category_id = $2",
             [itemDetails.name, itemDetails.categoryID],
             (db_err, db_res) => {
                 if (db_err) {
                     throw db_err;
+                } else {
+                    qryResult = db_res.rows;
+                    if (qryResult.length > 0) {
+                        // Return id if it already exists
+                        res.status(200).json(db_res.rows);
+                    } else {
+                        // insert if it doesn't exist
+                        db.query(
+                            "INSERT INTO tbl_items (item_name, category_id) VALUES ($1, $2)",
+                            [itemDetails.name, itemDetails.categoryID],
+                            (db_err, db_res) => {
+                                if (db_err) {
+                                    throw db_err;
+                                } else {
+                                    db.query(
+                                        "SELECT item_id FROM tbl_items WHERE item_name = $1 and category_id = $2",
+                                        [
+                                            itemDetails.name,
+                                            itemDetails.categoryID,
+                                        ],
+                                        (db_err, db_res) => {
+                                            if (db_err) {
+                                                throw db_err;
+                                            }
+                                            // return id
+                                            res.status(200).json(db_res.rows);
+                                        }
+                                    );
+                                }
+                            }
+                        );
+                    }
                 }
             }
         );
-        result = {
-            status: "success",
-            message: "The message was successfully sent",
-        };
     } else {
         result = {
             status: "failed",
-            message: "The message was not sent",
         };
         res.status(400);
+        res.json(result);
     }
-    res.json(result);
+});
+
+// GET categories  ---- /categories
+app.get("/categories", (req, res) => {
+    db.query(
+        "SELECT * FROM tbl_item_categories ORDER BY category_name",
+        (db_err, db_res) => {
+            if (db_err) {
+                throw db_err;
+            }
+            res.status(200).json(db_res.rows);
+        }
+    );
 });
 
 // GET shoppinglist details
@@ -127,26 +181,55 @@ app.post("/shoppinglist/:listId/item", (req, res) => {
     const itemDetails = req.body;
     if (itemDetails.listID && itemDetails.itemID && itemDetails.itemCount) {
         db.query(
-            "INSERT INTO tbl_shoppinglist_items (list_id, item_id, item_count) VALUES ($1, $2, $3)",
-            [itemDetails.listID, itemDetails.itemID, itemDetails.itemCount],
+            "SELECT link_id FROM tbl_shoppinglist_items WHERE item_id = $1 AND list_id = $2",
+            [itemDetails.itemID, itemDetails.listID],
             (db_err, db_res) => {
                 if (db_err) {
                     throw db_err;
                 }
+                let qryResult = db_res.rows;
+                console.log(qryResult);
+                if (qryResult.length == 0) {
+                    db.query(
+                        "INSERT INTO tbl_shoppinglist_items (list_id, item_id, item_count) VALUES ($1, $2, $3)",
+                        [
+                            itemDetails.listID,
+                            itemDetails.itemID,
+                            itemDetails.itemCount,
+                        ],
+                        (db_err, db_res) => {
+                            if (db_err) {
+                                throw db_err;
+                            }
+                        }
+                    );
+                } else {
+                    db.query(
+                        "UPDATE tbl_shoppinglist_items SET item_count = item_count + 1 WHERE link_id = $1",
+                        [qryResult[0].link_id],
+                        (db_err, db_res) => {
+                            if (db_err) {
+                                throw db_err;
+                            }
+                        }
+                    );
+                }
+                result = {
+                    status: "success",
+                    message:
+                        "The item was successfully added to the shoppinglist",
+                };
+                res.json(result);
             }
         );
-        result = {
-            status: "success",
-            message: "The item was successfully added to the shoppinglist",
-        };
     } else {
         result = {
             status: "failed",
             message: "The item was not added to the shoppinglist",
         };
         res.status(400);
+        res.json(result);
     }
-    res.json(result);
 });
 
 // DELETE item from shoppinglist
@@ -215,30 +298,51 @@ app.post("/shoppinglist/:listId/update", (req, res) => {
         };
     } else if (itemDetails.linkID && itemDetails.change == -1) {
         db.query(
-            "UPDATE tbl_shoppinglist_items SET item_count = item_count - 1 WHERE link_id = $1",
+            "SELECT * FROM tbl_shoppinglist_items WHERE link_id = $1",
             [itemDetails.linkID],
             (db_err, db_res) => {
                 if (db_err) {
                     throw db_err;
                 }
+                let qryResult = db_res.rows;
+                if (qryResult.item_count == 1) {
+                    db.query(
+                        "DELETE FROM tbl_shoppinglist_items WHERE list_id = $1",
+                        [req.params.listId],
+                        (db_err, db_res) => {
+                            if (db_err) {
+                                throw db_err;
+                            }
+                        }
+                    );
+                } else {
+                    db.query(
+                        "UPDATE tbl_shoppinglist_items SET item_count = item_count - 1 WHERE link_id = $1",
+                        [itemDetails.linkID],
+                        (db_err, db_res) => {
+                            if (db_err) {
+                                throw db_err;
+                            }
+                        }
+                    );
+                }
+                result = {
+                    status: "success",
+                    message: "The amount decreased.",
+                };
+                res.json(result);
             }
         );
-        result = {
-            status: "success",
-            message: "The amount decreased.",
-        };
     } else {
         result = {
             status: "failed",
             message: "No changes were made to shopping list.",
         };
+        res.json(result);
     }
-    res.json(result);
 });
 
-app.get("/items/:list", (req, res) => {
-
-})
+app.get("/items/:list", (req, res) => {});
 
 // POST item to pantry
 app.post("/pantrylist/fromList", (req, res) => {

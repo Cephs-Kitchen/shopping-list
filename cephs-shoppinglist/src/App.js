@@ -1,8 +1,9 @@
 import { Component } from 'react';
 import './App.css';
 import ItemDisplay from './ItemDisplay';
+import ShoppingListDisplay from './ShoppingListDisplay';
 
-class ShoppingList extends Component {
+class App extends Component {
     constructor(props){
         super(props);
         this.state = {
@@ -16,11 +17,11 @@ class ShoppingList extends Component {
                     <ItemDisplay />
                 </section>
                 <section id="shoppinglist-container">
-                    <h2>Shopping List</h2>
+                    <ShoppingListDisplay />
                 </section>
             </main>
         );
     }
 }
 
-export default ShoppingList
+export default App

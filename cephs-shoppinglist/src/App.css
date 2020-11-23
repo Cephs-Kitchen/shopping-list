@@ -1,14 +1,14 @@
-*, html{
+*, html {
     padding: 0;
     margin: 0;
 }
 
-html, body, #root{
+html, body, #root {
     height: 100%;
     width: 100%;
 }
 
-main{
+main {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
@@ -17,22 +17,34 @@ main{
     width: 100%;
 }
 
-section{
+section {
     height: 100%;
     width: 100%;
     text-align: center;
     overflow: hidden;
 }
 
-#item-container{
+#item-container {
     background-color: aqua;
 }
 
-#shoppinglist-container{
+#shoppinglist-container {
     background-color: dodgerblue;
 }
 
-#item-list-container{
-    height: 100%;
-    overflow-y: scroll;
+#item-list-header {
+    height: 10vh;
+}
+
+#item-list-container, #shopping-list-container {
+    height: 90vh;
+    overflow-y: auto;
+}
+
+.search-box {
+    text-align: center;
+}
+
+.button-span {
+    cursor: pointer;
 }
