@@ -29,10 +29,10 @@ function ShoppingList(props) {
                     >
                         <FontAwesomeIcon icon={faMinus} />
                     </span>
-                    {item.item_name}{" "}
+                    {item.item_name}
                     <span
                         className="button-span"
-                        onClick={() => props.cartButton(item.link_id)}
+                        onClick={() => props.cartButton(item.link_id, item.item_id, item.item_count)}
                     >
                         <FontAwesomeIcon icon={faCartPlus} />
                     </span>

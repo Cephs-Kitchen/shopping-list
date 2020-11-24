@@ -24,7 +24,7 @@ class ItemDisplay extends React.Component {
             itemCategories: jsonCat,
         });
     }
-    
+
     async componentDidUpdate() {
         const resItems = await fetch(`http://localhost:3001/items`);
         const jsonItems = await resItems.json();
@@ -98,13 +98,11 @@ class ItemDisplay extends React.Component {
         };
         const resItems = await fetch("http://localhost:3001/item", options1);
         const jsonItems = await resItems.json();
-        console.log(jsonItems);
         let listBody = {
             listID: 1,
             itemID: jsonItems[0].item_id,
             itemCount: 1,
         };
-        console.log(listBody);
         const options2 = {
             method: "POST",
             headers: { "Content-Type": "application/json" },

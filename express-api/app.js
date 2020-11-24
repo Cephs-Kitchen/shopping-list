@@ -150,7 +150,7 @@ app.get("/shoppinglist/:listId", (req, res) => {
 // GET shoppinglist with items
 app.get("/shoppinglist/:listId/items", (req, res) => {
     db.query(
-        "SELECT link_id, item_name, category_name, item_count FROM tbl_shoppinglist_items INNER JOIN tbl_items ON tbl_items.item_id = tbl_shoppinglist_items.item_id INNER JOIN tbl_item_categories ON tbl_item_categories.category_id = tbl_items.category_id WHERE list_id = $1",
+        "SELECT link_id, tbl_shoppinglist_items.item_id, item_name, category_name, item_count FROM tbl_shoppinglist_items INNER JOIN tbl_items ON tbl_items.item_id = tbl_shoppinglist_items.item_id INNER JOIN tbl_item_categories ON tbl_item_categories.category_id = tbl_items.category_id WHERE list_id = $1 ORDER BY category_name, item_name",
         [req.params.listId],
         (db_err, db_res) => {
             if (db_err) {
@@ -164,7 +164,7 @@ app.get("/shoppinglist/:listId/items", (req, res) => {
 // GET shoppinglist with items but sorted
 app.get("/shoppinglist/:listId/items/sorted", (req, res) => {
     db.query(
-        "SELECT link_id, item_name, category_name, item_count FROM tbl_shoppinglist_items INNER JOIN tbl_items ON tbl_items.item_id = tbl_shoppinglist_items.item_id INNER JOIN tbl_item_categories ON tbl_item_categories.category_id = tbl_items.category_id WHERE list_id = $1 ORDER BY category_name",
+        "SELECT link_id, item_name, category_name, item_count FROM tbl_shoppinglist_items INNER JOIN tbl_items ON tbl_items.item_id = tbl_shoppinglist_items.item_id INNER JOIN tbl_item_categories ON tbl_item_categories.category_id = tbl_items.category_id WHERE list_id = $1 ORDER BY category_name, item_name",
         [req.params.listId],
         (db_err, db_res) => {
             if (db_err) {
@@ -188,7 +188,6 @@ app.post("/shoppinglist/:listId/item", (req, res) => {
                     throw db_err;
                 }
                 let qryResult = db_res.rows;
-                console.log(qryResult);
                 if (qryResult.length == 0) {
                     db.query(
                         "INSERT INTO tbl_shoppinglist_items (list_id, item_id, item_count) VALUES ($1, $2, $3)",
@@ -305,10 +304,10 @@ app.post("/shoppinglist/:listId/update", (req, res) => {
                     throw db_err;
                 }
                 let qryResult = db_res.rows;
-                if (qryResult.item_count == 1) {
+                if (qryResult[0].item_count == 1) {
                     db.query(
-                        "DELETE FROM tbl_shoppinglist_items WHERE list_id = $1",
-                        [req.params.listId],
+                        "DELETE FROM tbl_shoppinglist_items WHERE link_id = $1",
+                        [itemDetails.linkID],
                         (db_err, db_res) => {
                             if (db_err) {
                                 throw db_err;
@@ -362,7 +361,6 @@ app.post("/pantrylist/fromList", (req, res) => {
                     throw db_err;
                 } else {
                     setValue(db_res.rows);
-
                     if (qryResult.length > 0) {
                         db.query(
                             "UPDATE tbl_pantrylist SET amount = $1 WHERE pantry_item_id = $2",

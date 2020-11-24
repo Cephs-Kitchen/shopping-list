@@ -68,7 +68,7 @@ class ShoppingListDisplay extends React.Component {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(reqBody),
             };
-            fetch("http://localhost:3001/shoppinglist/1/item", options)
+            fetch("http://localhost:3001/shoppinglist/1/update", options)
                 .then((res) => res.json())
                 .then((res) => {
                     if (res.status === "failed") {
@@ -78,9 +78,64 @@ class ShoppingListDisplay extends React.Component {
         }
     };
 
-    handleMinus = (item) => {};
+    handleMinus = (item) => {
+        if (item > 0) {
+            let reqBody = {
+                linkID: item,
+                change: -1,
+            };
 
-    handleCart = (item) => {};
+            const options = {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(reqBody),
+            };
+            fetch("http://localhost:3001/shoppinglist/1/update", options)
+                .then((res) => res.json())
+                .then((res) => {
+                    if (res.status === "failed") {
+                        alert(res.message);
+                    }
+                });
+        }
+    };
+
+    handleCart = (linkID, itemID, itemCount) => {
+        console.log(linkID + " " + itemID + " " + itemCount)
+        if (linkID && itemID && itemCount) {
+            let reqBody = {
+                itemID: itemID,
+                itemCount: itemCount,
+            };
+            const options = {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(reqBody),
+            };
+            fetch("http://localhost:3001/pantrylist/fromList", options)
+                .then((res) => res.json())
+                .then((res) => {
+                    if (res.status === "failed") {
+                        alert(res.message);
+                    }
+                    fetch(
+                        "http://localhost:3001/shoppinglist/1/item?linkId=" +
+                            linkID,
+                        { method: "DELETE" }
+                    )
+                        .then((res) => res.json())
+                        .then((res) => {
+                            if (res.status === "failed") {
+                                alert(res.message);
+                            } else {
+                                alert("Item added to pantry and removed from cart.")
+                            }
+                        });
+                });
+        } else {
+            alert('ERROR');
+        }
+    };
 
     render() {
         return (
