@@ -11,10 +11,10 @@ app.use(bodyParser.json());
 const Pool = require("pg").Pool;
 const db = new Pool({
     user: "ceph",
-    host: "localhost", //Update host as needed
+    host: "database", //Update host as needed
     database: "cephs_citchen",
     password: "ceph",
-    port: 5400, //Update port as needed
+    port: 5432, //Update port as needed
 });
 
 app.get("", (req, res) => {
