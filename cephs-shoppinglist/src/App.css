@@ -8,6 +8,8 @@ html, body, #root {
     width: 100%;
 }
 
+/* body{ background-color: #000; } */
+
 main {
     display: flex;
     flex-direction: row;
@@ -15,6 +17,7 @@ main {
     align-items: flex-start;
     height: 100%;
     width: 100%;
+    color: #fff;
 }
 
 section {
@@ -24,20 +27,12 @@ section {
     overflow: hidden;
 }
 
-#item-container {
-    background-color: aqua;
-}
-
-#shoppinglist-container {
-    background-color: dodgerblue;
-}
-
 #item-list-header {
-    height: 10vh;
+    height: 15vh;
 }
 
 #item-list-container, #shopping-list-container {
-    height: 90vh;
+    height: 85vh;
     overflow-y: auto;
 }
 
@@ -47,4 +42,17 @@ section {
 
 .button-span {
     cursor: pointer;
+    margin: 0 10px;
+}
+
+.section-header{
+    text-align: left;
+    padding-left: calc(30px + 5vw);
+    font-size: calc(1.25vh + 1.25vw);
+}
+
+.item-row{
+    text-align: left;
+    padding-left: calc(60px + 6vw);
+    font-size: calc(1vh + 1vw);
 }

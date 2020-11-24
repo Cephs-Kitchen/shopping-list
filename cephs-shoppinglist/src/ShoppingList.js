@@ -8,14 +8,14 @@ function ShoppingList(props) {
     const formattedList = items.map((item) => {
         if (category !== item.category_name) {
             category = item.category_name;
-            categoryLabel = <h3>{category}</h3>;
+            categoryLabel = <h3 className="section-header">{category}</h3>;
         } else {
             categoryLabel = "";
         }
         return (
             <div id={item.link_id}>
                 {categoryLabel}
-                <p>
+                <p className="item-row">
                     <span
                         className="button-span"
                         onClick={() => props.plusButton(item.link_id)}

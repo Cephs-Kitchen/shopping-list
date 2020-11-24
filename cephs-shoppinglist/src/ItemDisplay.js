@@ -14,9 +14,9 @@ class ItemDisplay extends React.Component {
     }
 
     async componentDidMount() {
-        const resItems = await fetch(`http://localhost:3001/items`);
+        const resItems = await fetch(`http://localhost:4001/items`);
         const jsonItems = await resItems.json();
-        const resCat = await fetch(`http://localhost:3001/categories`);
+        const resCat = await fetch(`http://localhost:4001/categories`);
         const jsonCat = await resCat.json();
         this.setState({
             itemList: jsonItems,
@@ -26,9 +26,9 @@ class ItemDisplay extends React.Component {
     }
 
     async componentDidUpdate() {
-        const resItems = await fetch(`http://localhost:3001/items`);
+        const resItems = await fetch(`http://localhost:4001/items`);
         const jsonItems = await resItems.json();
-        const resCat = await fetch(`http://localhost:3001/categories`);
+        const resCat = await fetch(`http://localhost:4001/categories`);
         const jsonCat = await resCat.json();
         this.setState({
             itemList: jsonItems,
@@ -96,7 +96,7 @@ class ItemDisplay extends React.Component {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(itemBody),
         };
-        const resItems = await fetch("http://localhost:3001/item", options1);
+        const resItems = await fetch("http://localhost:4001/item", options1);
         const jsonItems = await resItems.json();
         let listBody = {
             listID: 1,
@@ -109,7 +109,7 @@ class ItemDisplay extends React.Component {
             body: JSON.stringify(listBody),
         };
         const resList = await fetch(
-            "http://localhost:3001/shoppinglist/1/item",
+            "http://localhost:4001/shoppinglist/1/item",
             options2
         );
         const jsonList = await resList.json();
@@ -129,7 +129,7 @@ class ItemDisplay extends React.Component {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(itemBody),
         };
-        fetch("http://localhost:3001/shoppinglist/1/item", requestOptions)
+        fetch("http://localhost:4001/shoppinglist/1/item", requestOptions)
             .then((res) => res.json())
             .then((res) => {
                 if (res.status === "failed") {
@@ -161,6 +161,7 @@ class ItemDisplay extends React.Component {
                         className="search-box"
                         value={this.state.searchValue}
                         onChange={this.handleOnChange}
+                        placeholder="Search or Add New"
                     />
                     {categorySelect}
                     <br />
